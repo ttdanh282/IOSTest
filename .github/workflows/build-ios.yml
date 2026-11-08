@@ -1,3 +1,4 @@
+
 name: Build iOS App
 
 on:
@@ -22,20 +23,26 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Build iOS App
+      - name: Build for iPhone
         run: |
           xcodebuild \
             -project IOSTest.xcodeproj \
             -scheme IOSTest \
             -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Upload build artifact
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Debug-iphoneos/IOSTest.app Payload/
+          zip -r IOSTest.ipa Payload
+
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: IOSTest-Simulator
-          path: build/Build/Products/Debug-iphonesimulator/IOSTest.app
+          name: IOSTest-iPhone
+          path: IOSTest.ipa
